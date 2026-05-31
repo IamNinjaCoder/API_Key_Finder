@@ -70,7 +70,7 @@ def send_telegram_alert(provider, repo_name, match_preview):
     
     req = urllib.request.Request(url, data=data, headers=headers, method="POST")
     try:
-        urllib.request.urlopen(req)
+        urllib.request.urlopen(req, timeout=10)  # 10 second timeout prevents hanging
     except Exception as e:
         print(f"Failed to send Telegram alert: {e}")
 
@@ -83,7 +83,7 @@ def get_github_events():
         
     req = urllib.request.Request(url, headers=headers)
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, timeout=10) as response:  # 10 second timeout
             return json.loads(response.read().decode('utf-8'))
     except Exception as e:
         print(f"Error fetching GitHub events (rate limit?): {e}")
