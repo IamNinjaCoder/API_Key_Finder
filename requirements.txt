@@ -1,0 +1,13 @@
+# No external PIP dependencies required!
+#
+# This project is built entirely using Python's standard library to ensure 
+# maximum compatibility and efficiency on remote Linux servers and cloud functions.
+# 
+# Standard imports used:
+# - urllib
+# - json
+# - re
+# - os
+# - subprocess
+# - tempfile
+# - concurrent.futures
