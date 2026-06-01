@@ -34,18 +34,16 @@ if not os.path.exists(TEMP_DIR):
 # EXTENDED REGEX PATTERNS (AI + CREDS + DATABASES)
 # ==========================================
 PATTERNS = {
+    # AI Model APIs
     "Anthropic API Key": r"sk-ant-api03-[A-Za-z0-9\-_]{80,95}",
     "OpenAI API Key": r"sk-[a-zA-Z0-9]{48}",
-    "AWS Access Key": r"AKIA[0-9A-Z]{16}",
-    "AWS Secret Key": r"(?i)aws_secret_access_key\s*=\s*[a-zA-Z0-9/+=]{40}",
-    "GCP API Key": r"AIza[0-9A-Za-z\-_]{35}",
-    "Slack Token": r"xox[baprs]-[0-9a-zA-Z]{10,48}",
-    "GitHub Token": r"gh[pousr]_[A-Za-z0-9]{36}",
-    "MongoDB URI": r"mongodb(?:\+srv)?:\/\/[^\s]+",
-    "Postgres URI": r"postgres(?:ql)?:\/\/[^\s]+",
-    "Discord Webhook": r"https:\/\/discord\.com\/api\/webhooks\/[0-9]{17,19}\/[a-zA-Z0-9\-_]{68}",
-    "Stripe Secret Key": r"sk_live_[0-9a-zA-Z]{24}",
-    "RSA Private Key": r"-----BEGIN RSA PRIVATE KEY-----"
+    "Google Gemini API Key": r"AIza[0-9A-Za-z\-_]{35}",
+    "HuggingFace Token": r"hf_[a-zA-Z0-9]{34}",
+    "Cohere API Key": r"[a-zA-Z0-9]{40}",
+    # Cloud Infrastructure Secrets
+    "AWS Access Key ID": r"AKIA[0-9A-Z]{16}",
+    "AWS Secret Access Key": r"(?i)aws_secret_access_key\s*=\s*['\"]?[a-zA-Z0-9/+=]{40}['\"]?",
+    "Azure Storage/Client Secret": r"(?i)tenant_id|client_secret.*?['\"][a-zA-Z0-9\-_~.]{20,50}['\"]"
 }
 
 def send_telegram_alert(provider, repo_name, match_preview, file_path=""):
